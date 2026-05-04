@@ -48,16 +48,24 @@ class SayCog(commands.Cog):
                 voice_client.stop()
                 
             # Đọc file âm thanh
-            # THỬ CÁCH KHÔNG CẦN CÀI FFMPEG VÀO MÁY BẰNG IMAGEIO-FFMPEG
+            # Hỗ trợ đa nền tảng: 
+            # - Windows: Dùng imageio_ffmpeg cho tiện (không cần cài thủ công).
+            # - Ubuntu/Linux: Dùng FFmpeg hệ thống cài qua apt để tránh lỗi tương thích.
+            import platform
             try:
-                import imageio_ffmpeg
-                ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
-                source = discord.FFmpegPCMAudio(filename, executable=ffmpeg_path)
-            except ImportError:
-                # Nếu không có thư viện imageio_ffmpeg, dùng ffmpeg mặc định của hệ thống
-                source = discord.FFmpegPCMAudio(filename)
-
-            voice_client.play(source, after=after_playing)
+                if platform.system() == "Windows":
+                    import imageio_ffmpeg
+                    ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
+                    source = discord.FFmpegPCMAudio(filename, executable=ffmpeg_path)
+                else:
+                    source = discord.FFmpegPCMAudio(filename)
+                    
+                voice_client.play(source, after=after_playing)
+            except Exception as play_error:
+                # Nếu có lỗi (ví dụ chưa cài ffmpeg) thì file không được xoá ở after_playing, nên xoá ở đây
+                if os.path.exists(filename):
+                    os.remove(filename)
+                raise play_error
             
             await interaction.followup.send(f"🔊 Đang đọc: **{text}**", ephemeral=True)
             await send_log(f'🔊 [Server: {interaction.guild.name}] Đã đọc: {text}')
