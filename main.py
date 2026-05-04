@@ -15,11 +15,17 @@ class VoiceHoldBot(commands.Bot):
         intents.guilds = True
         intents.voice_states = True
         super().__init__(command_prefix="!", intents=intents)
+        # Lưu trữ các kênh thoại mà bot đang "giữ chỗ" (theo format: guild_id -> channel_id)
+        self.active_channels = {}
 
     async def setup_hook(self):
-        # Tải các Cogs (Module)
-        await self.load_extension('cogs.voice')
-        await self.load_extension('cogs.admin')
+        # Tự động tải tất cả các Cogs (Module) trong thư mục cogs
+        for filename in os.listdir('./cogs'):
+            if filename.endswith('.py') and not filename.startswith('__'):
+                try:
+                    await self.load_extension(f'cogs.{filename[:-3]}')
+                except Exception as e:
+                    print(f"Lỗi khi tải file {filename}: {e}")
 
 
         # Đồng bộ Slash Commands với Discord

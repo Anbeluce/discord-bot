@@ -6,7 +6,9 @@ import os
 COMMAND_PERMISSIONS = {
     "join": "owner",
     "leave": "owner",
-    "restart": "owner"
+    "restart": "owner",
+    "say": "owner",
+    "clean": "owner"
 }
 
 def check_permission(command_name: str, user_id: int) -> bool:

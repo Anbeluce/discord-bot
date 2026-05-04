@@ -6,16 +6,14 @@ import sys
 from utils.logger import send_log
 from config import check_permission
 
-class AdminCog(commands.Cog):
+class RestartCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        # Lấy ID chủ bot từ biến môi trường
-        self.owner_id = int(os.getenv('OWNER_ID', 0))
 
-    @app_commands.command(name="restart", description="Cho bot đi đái")
+    @app_commands.command(name="restart", description="Cho bot đi đái (Khởi động lại)")
     async def restart(self, interaction: discord.Interaction):
         if not check_permission("restart", interaction.user.id):
-            await interaction.response.send_message("❌", ephemeral=True)
+            await interaction.response.send_message("❌ stupid!", ephemeral=True)
             return
         
         await interaction.response.send_message("Bot đi đái đợi tí...", ephemeral=True)
@@ -25,4 +23,4 @@ class AdminCog(commands.Cog):
         os.execv(sys.executable, ['python'] + sys.argv)
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(AdminCog(bot))
+    await bot.add_cog(RestartCog(bot))
